@@ -2,5 +2,5 @@
 <!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.3//EN"
 	"http://www.seasar.org/dtd/components23.dtd">
 <components>
-	<component name="Employee" class="org.seasar.dwr.creator.EmployeeServiceImpl"/>
+	<component name="Employee" class="org.seasar.dwr.creator.EmployeeServiceImpl" instance="request"/>
 </components>

@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.directwebremoting.create.AbstractCreator;
 import org.directwebremoting.extend.Creator;
+import org.seasar.framework.container.ComponentDef;
 import org.seasar.framework.container.S2Container;
 import org.seasar.framework.container.factory.SingletonS2ContainerFactory;
 import org.seasar.framework.util.ClassUtil;
@@ -61,10 +62,17 @@ public class S2Creator extends AbstractCreator implements Creator {
 
     public Class getType() {
         if (instanceClass == null) {
-            try {
-                instanceClass = getInstance().getClass();
-            } catch (InstantiationException e) {
-                log.warn("Failed to instantiate object to detect type.", e);
+            S2Container container = SingletonS2ContainerFactory.getContainer();
+            ComponentDef componentDef = null;
+            if (classType != null) {
+                componentDef = container.getComponentDef(classType);
+            } else {
+                componentDef = container.getComponentDef(componentName);
+            }
+            if (componentDef != null) {
+                instanceClass = componentDef.getComponentClass();
+            } else {
+                log.warn("Failed to instantiate object to detect type.");
                 instanceClass = Object.class;
             }
         }

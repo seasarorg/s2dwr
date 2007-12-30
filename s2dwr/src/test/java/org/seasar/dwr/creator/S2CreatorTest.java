@@ -2,6 +2,7 @@ package org.seasar.dwr.creator;
 
 import org.directwebremoting.extend.Creator;
 import org.seasar.extension.unit.S2TestCase;
+import org.seasar.framework.container.S2Container;
 
 public class S2CreatorTest extends S2TestCase {
 
@@ -32,6 +33,12 @@ public class S2CreatorTest extends S2TestCase {
     }
 
     public void testGetType() {
+        // 型取得時は、Request、Responseが取得できない
+        S2Container container2 = getContainer();
+        container2.setRequest(null);
+        container2.setResponse(null);
+        setRequest(null);
+        setResponse(null);
         creator.setComponent("Employee");
         Class clazz = creator.getType();
         assertEquals(EmployeeServiceImpl.class, clazz);
