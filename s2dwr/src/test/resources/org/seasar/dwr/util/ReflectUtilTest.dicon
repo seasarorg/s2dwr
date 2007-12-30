@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.3//EN"
+	"http://www.seasar.org/dtd/components23.dtd">
+<components>
+	<component name="traceInterceptor" class="org.seasar.framework.aop.interceptors.TraceInterceptor"/>
+	<component class="org.seasar.dwr.util.EmployeeService">
+		<aspect pointcut="getEmployeeName">traceInterceptor</aspect>
+	</component>
+</components>
