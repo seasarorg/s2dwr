@@ -6,7 +6,7 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="lib" path="lib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/dwr-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/dwr-2.0.2.jar" sourcepath="lib/dwr-2.0.2-source.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-j2ee_1.4_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-jta_1.0.1B_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/javassist-3.4.ga.jar"/>
@@ -15,8 +15,8 @@
 	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/ognl-2.6.9-patch-20070624.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.0-FINAL.jar"/>
-	<classpathentry kind="lib" path="lib/s2-extension-2.3.23.jar"/>
-	<classpathentry kind="lib" path="lib/s2-framework-2.3.23.jar"/>
+	<classpathentry kind="lib" path="lib/s2-extension-2.3.23.jar" sourcepath="lib/s2-extension-2.3.23-sources.jar"/>
+	<classpathentry kind="lib" path="lib/s2-framework-2.3.23.jar" sourcepath="lib/s2-framework-2.3.23-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
