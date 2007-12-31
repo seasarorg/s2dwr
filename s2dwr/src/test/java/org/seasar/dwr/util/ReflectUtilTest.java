@@ -11,7 +11,7 @@ public class ReflectUtilTest extends S2TestCase {
         include("ReflectUtilTest.dicon");
     }
 
-    public void testGetConcreteMethod() throws Exception {
+    public void testGetConcreteMethod1() throws Exception {
         Method expected = EmployeeService.class.getMethod("getEmployeeName",
                 new Class[] { String.class });
         EmployeeService emp = (EmployeeService) getComponent(EmployeeService.class);
@@ -19,6 +19,13 @@ public class ReflectUtilTest extends S2TestCase {
                 new Class[] { String.class });
         assertFalse(expected.equals(method));
         method = ReflectUtil.getConcreteMethod(method);
+        assertEquals(expected, method);
+    }
+
+    public void testGetConcreteMethod2() throws Exception {
+        Method expected = EmployeeService.class.getMethod("getEmployeeName",
+                new Class[] { String.class });
+        Method method = ReflectUtil.getConcreteMethod(expected);
         assertEquals(expected, method);
     }
 
