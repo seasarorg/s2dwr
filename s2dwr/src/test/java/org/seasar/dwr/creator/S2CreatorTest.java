@@ -14,7 +14,7 @@ public class S2CreatorTest extends S2TestCase {
     }
 
     public void testGetInstance1() throws Exception {
-        creator.setComponent("Employee");
+        creator.setComponent("employee");
         Object obj = creator.getInstance();
         assertNotNull(obj);
         assertTrue(obj instanceof EmployeeServiceImpl);
@@ -39,7 +39,7 @@ public class S2CreatorTest extends S2TestCase {
         container2.setResponse(null);
         setRequest(null);
         setResponse(null);
-        creator.setComponent("Employee");
+        creator.setComponent("employee");
         Class clazz = creator.getType();
         assertEquals(EmployeeServiceImpl.class, clazz);
     }
