@@ -1,3 +1,18 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 package org.seasar.dwr.impl;
 
 import java.io.IOException;
@@ -28,223 +43,223 @@ import org.seasar.dwr.util.ReflectUtil;
 
 public class S2PlainCallMarshaller extends PlainCallMarshaller {
 
-	/**
-	 * By default we disable GET, but this hinders old Safaris
-	 */
-	private boolean allowGetForSafariButMakeForgeryEasier = false;
+    /**
+     * By default we disable GET, but this hinders old Safaris
+     */
+    private boolean allowGetForSafariButMakeForgeryEasier = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.directwebremoting.extend.Marshaller#marshallInbound(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	public Calls marshallInbound(HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServerException {
-		// We must parse the parameters before we setup the conduit because it's
-		// only after doing this that we know the scriptSessionId
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.directwebremoting.extend.Marshaller#marshallInbound(javax.servlet.http.HttpServletRequest,
+     *      javax.servlet.http.HttpServletResponse)
+     */
+    public Calls marshallInbound(HttpServletRequest request,
+            HttpServletResponse response) throws IOException, ServerException {
+        // We must parse the parameters before we setup the conduit because it's
+        // only after doing this that we know the scriptSessionId
 
-		WebContext webContext = WebContextFactory.get();
-		Batch batch = (Batch) request.getAttribute(ATTRIBUTE_BATCH);
-		if (batch == null) {
-			batch = new Batch(request, crossDomainSessionSecurity,
-					allowGetForSafariButMakeForgeryEasier, sessionCookieName);
+        WebContext webContext = WebContextFactory.get();
+        Batch batch = (Batch) request.getAttribute(ATTRIBUTE_BATCH);
+        if (batch == null) {
+            batch = new Batch(request, crossDomainSessionSecurity,
+                    allowGetForSafariButMakeForgeryEasier, sessionCookieName);
 
-			// Save calls for retry exception
-			request.setAttribute(ATTRIBUTE_BATCH, batch);
-		}
+            // Save calls for retry exception
+            request.setAttribute(ATTRIBUTE_BATCH, batch);
+        }
 
-		// Various bits of the Batch need to be stashed away places
-		storeParsedRequest(request, webContext, batch);
+        // Various bits of the Batch need to be stashed away places
+        storeParsedRequest(request, webContext, batch);
 
-		Calls calls = batch.getCalls();
+        Calls calls = batch.getCalls();
 
-		// Debug the environment
-		if (log.isDebugEnabled() && calls.getCallCount() > 0) {
-			// We can just use 0 because they are all shared
-			InboundContext inctx = (InboundContext) batch.getInboundContexts()
-					.get(0);
-			StringBuffer buffer = new StringBuffer();
+        // Debug the environment
+        if (log.isDebugEnabled() && calls.getCallCount() > 0) {
+            // We can just use 0 because they are all shared
+            InboundContext inctx = (InboundContext) batch.getInboundContexts()
+                    .get(0);
+            StringBuffer buffer = new StringBuffer();
 
-			for (Iterator it = inctx.getInboundVariableNames(); it.hasNext();) {
-				String key = (String) it.next();
-				InboundVariable value = inctx.getInboundVariable(key);
-				if (key.startsWith(ProtocolConstants.INBOUND_CALLNUM_PREFIX)
-						&& key.indexOf(ProtocolConstants.INBOUND_CALLNUM_SUFFIX
-								+ ProtocolConstants.INBOUND_KEY_ENV) != -1) {
-					buffer.append(key);
-					buffer.append('=');
-					buffer.append(value.toString());
-					buffer.append(", ");
-				}
-			}
+            for (Iterator it = inctx.getInboundVariableNames(); it.hasNext();) {
+                String key = (String) it.next();
+                InboundVariable value = inctx.getInboundVariable(key);
+                if (key.startsWith(ProtocolConstants.INBOUND_CALLNUM_PREFIX)
+                        && key.indexOf(ProtocolConstants.INBOUND_CALLNUM_SUFFIX
+                                + ProtocolConstants.INBOUND_KEY_ENV) != -1) {
+                    buffer.append(key);
+                    buffer.append('=');
+                    buffer.append(value.toString());
+                    buffer.append(", ");
+                }
+            }
 
-			if (buffer.length() > 0) {
-				log.debug("Environment:  " + buffer.toString());
-			}
-		}
+            if (buffer.length() > 0) {
+                log.debug("Environment:  " + buffer.toString());
+            }
+        }
 
-		callLoop: for (int callNum = 0; callNum < calls.getCallCount(); callNum++) {
-			Call call = calls.getCall(callNum);
-			InboundContext inctx = (InboundContext) batch.getInboundContexts()
-					.get(callNum);
+        callLoop: for (int callNum = 0; callNum < calls.getCallCount(); callNum++) {
+            Call call = calls.getCall(callNum);
+            InboundContext inctx = (InboundContext) batch.getInboundContexts()
+                    .get(callNum);
 
-			// Get a list of the available matching methods with the coerced
-			// parameters that we will use to call it if we choose to use
-			// that method.
-			Creator creator = creatorManager.getCreator(call.getScriptName());
+            // Get a list of the available matching methods with the coerced
+            // parameters that we will use to call it if we choose to use
+            // that method.
+            Creator creator = creatorManager.getCreator(call.getScriptName());
 
-			// Which method are we using?
-			Method method = findMethod(call, inctx);
-			if (method == null) {
-				String name = call.getScriptName() + '.' + call.getMethodName();
-				String error = Messages.getString(
-						"BaseCallMarshaller.UnknownMethod", name);
-				log.warn("Marshalling exception: " + error);
+            // Which method are we using?
+            Method method = findMethod(call, inctx);
+            if (method == null) {
+                String name = call.getScriptName() + '.' + call.getMethodName();
+                String error = Messages.getString(
+                        "BaseCallMarshaller.UnknownMethod", name);
+                log.warn("Marshalling exception: " + error);
 
-				call.setMethod(null);
-				call.setParameters(null);
-				call.setException(new IllegalArgumentException(error));
+                call.setMethod(null);
+                call.setParameters(null);
+                call.setException(new IllegalArgumentException(error));
 
-				continue callLoop;
-			}
+                continue callLoop;
+            }
 
-			call.setMethod(method);
+            call.setMethod(method);
 
-			// Check this method is accessible
-			accessControl.assertExecutionIsPossible(creator, call
-					.getScriptName(), method);
+            // Check this method is accessible
+            accessControl.assertExecutionIsPossible(creator, call
+                    .getScriptName(), method);
 
-			method = ReflectUtil.getConcreteMethod(method);
+            method = ReflectUtil.getConcreteMethod(method);
 
-			// Convert all the parameters to the correct types
-			Object[] params = new Object[method.getParameterTypes().length];
-			for (int j = 0; j < method.getParameterTypes().length; j++) {
-				try {
-					Class paramType = method.getParameterTypes()[j];
-					InboundVariable param = inctx.getParameter(callNum, j);
-					TypeHintContext incc = new TypeHintContext(
-							converterManager, method, j);
-					params[j] = converterManager.convertInbound(paramType,
-							param, inctx, incc);
-				} catch (MarshallException ex) {
-					log.warn("Marshalling exception", ex);
+            // Convert all the parameters to the correct types
+            Object[] params = new Object[method.getParameterTypes().length];
+            for (int j = 0; j < method.getParameterTypes().length; j++) {
+                try {
+                    Class paramType = method.getParameterTypes()[j];
+                    InboundVariable param = inctx.getParameter(callNum, j);
+                    TypeHintContext incc = new TypeHintContext(
+                            converterManager, method, j);
+                    params[j] = converterManager.convertInbound(paramType,
+                            param, inctx, incc);
+                } catch (MarshallException ex) {
+                    log.warn("Marshalling exception", ex);
 
-					call.setMethod(null);
-					call.setParameters(null);
-					call.setException(ex);
+                    call.setMethod(null);
+                    call.setParameters(null);
+                    call.setException(ex);
 
-					continue callLoop;
-				}
-			}
+                    continue callLoop;
+                }
+            }
 
-			call.setParameters(params);
-		}
+            call.setParameters(params);
+        }
 
-		return calls;
-	}
+        return calls;
+    }
 
-	/**
-	 * @param allowGetForSafariButMakeForgeryEasier
-	 *            Do we reduce security to help Safari
-	 */
-	public void setAllowGetForSafariButMakeForgeryEasier(
-			boolean allowGetForSafariButMakeForgeryEasier) {
-		super
-				.setAllowGetForSafariButMakeForgeryEasier(allowGetForSafariButMakeForgeryEasier);
-		this.allowGetForSafariButMakeForgeryEasier = allowGetForSafariButMakeForgeryEasier;
-	}
+    /**
+     * @param allowGetForSafariButMakeForgeryEasier
+     *                Do we reduce security to help Safari
+     */
+    public void setAllowGetForSafariButMakeForgeryEasier(
+            boolean allowGetForSafariButMakeForgeryEasier) {
+        super
+                .setAllowGetForSafariButMakeForgeryEasier(allowGetForSafariButMakeForgeryEasier);
+        this.allowGetForSafariButMakeForgeryEasier = allowGetForSafariButMakeForgeryEasier;
+    }
 
-	/**
-	 * Build a Batch and put it in the request
-	 * 
-	 * @param request
-	 *            Where we store the parsed data
-	 * @param webContext
-	 *            We need to notify others of some of the data we find
-	 * @param batch
-	 *            The parsed data to store
-	 */
-	private void storeParsedRequest(HttpServletRequest request,
-			WebContext webContext, Batch batch) {
-		String normalizedPage = pageNormalizer.normalizePage(batch.getPage());
-		webContext.setCurrentPageInformation(normalizedPage, batch
-				.getScriptSessionId());
+    /**
+     * Build a Batch and put it in the request
+     * 
+     * @param request
+     *                Where we store the parsed data
+     * @param webContext
+     *                We need to notify others of some of the data we find
+     * @param batch
+     *                The parsed data to store
+     */
+    private void storeParsedRequest(HttpServletRequest request,
+            WebContext webContext, Batch batch) {
+        String normalizedPage = pageNormalizer.normalizePage(batch.getPage());
+        webContext.setCurrentPageInformation(normalizedPage, batch
+                .getScriptSessionId());
 
-		// Remaining parameters get put into the request for later consumption
-		Map paramMap = batch.getSpareParameters();
-		if (paramMap.size() != 0) {
-			for (Iterator it = paramMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String key = (String) entry.getKey();
-				String value = (String) entry.getValue();
+        // Remaining parameters get put into the request for later consumption
+        Map paramMap = batch.getSpareParameters();
+        if (paramMap.size() != 0) {
+            for (Iterator it = paramMap.entrySet().iterator(); it.hasNext();) {
+                Map.Entry entry = (Map.Entry) it.next();
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
 
-				request.setAttribute(key, value);
-				log.debug("Moved param to request: " + key + "=" + value);
-			}
-		}
-	}
+                request.setAttribute(key, value);
+                log.debug("Moved param to request: " + key + "=" + value);
+            }
+        }
+    }
 
-	/**
-	 * Find the method the best matches the method name and parameters
-	 * 
-	 * @param call
-	 *            The function call we are going to make
-	 * @param inctx
-	 *            The data conversion context
-	 * @return A matching method, or null if one was not found.
-	 */
-	private Method findMethod(Call call, InboundContext inctx) {
-		if (call.getScriptName() == null) {
-			throw new IllegalArgumentException(Messages
-					.getString("BaseCallMarshaller.MissingClassParam"));
-		}
+    /**
+     * Find the method the best matches the method name and parameters
+     * 
+     * @param call
+     *                The function call we are going to make
+     * @param inctx
+     *                The data conversion context
+     * @return A matching method, or null if one was not found.
+     */
+    private Method findMethod(Call call, InboundContext inctx) {
+        if (call.getScriptName() == null) {
+            throw new IllegalArgumentException(Messages
+                    .getString("BaseCallMarshaller.MissingClassParam"));
+        }
 
-		if (call.getMethodName() == null) {
-			throw new IllegalArgumentException(Messages
-					.getString("BaseCallMarshaller.MissingMethodParam"));
-		}
+        if (call.getMethodName() == null) {
+            throw new IllegalArgumentException(Messages
+                    .getString("BaseCallMarshaller.MissingMethodParam"));
+        }
 
-		Creator creator = creatorManager.getCreator(call.getScriptName());
-		Method[] methods = creator.getType().getMethods();
-		List available = new ArrayList();
+        Creator creator = creatorManager.getCreator(call.getScriptName());
+        Method[] methods = creator.getType().getMethods();
+        List available = new ArrayList();
 
-		methods: for (int i = 0; i < methods.length; i++) {
-			// Check method name and access
-			if (methods[i].getName().equals(call.getMethodName())) {
-				// Check number of parameters
-				if (methods[i].getParameterTypes().length == inctx
-						.getParameterCount()) {
-					// Clear the previous conversion attempts (the param types
-					// will probably be different)
-					inctx.clearConverted();
+        methods: for (int i = 0; i < methods.length; i++) {
+            // Check method name and access
+            if (methods[i].getName().equals(call.getMethodName())) {
+                // Check number of parameters
+                if (methods[i].getParameterTypes().length == inctx
+                        .getParameterCount()) {
+                    // Clear the previous conversion attempts (the param types
+                    // will probably be different)
+                    inctx.clearConverted();
 
-					// Check parameter types
-					for (int j = 0; j < methods[i].getParameterTypes().length; j++) {
-						Class paramType = methods[i].getParameterTypes()[j];
-						if (!converterManager.isConvertable(paramType)) {
-							// Give up with this method and try the next
-							continue methods;
-						}
-					}
+                    // Check parameter types
+                    for (int j = 0; j < methods[i].getParameterTypes().length; j++) {
+                        Class paramType = methods[i].getParameterTypes()[j];
+                        if (!converterManager.isConvertable(paramType)) {
+                            // Give up with this method and try the next
+                            continue methods;
+                        }
+                    }
 
-					available.add(methods[i]);
-				}
-			}
-		}
+                    available.add(methods[i]);
+                }
+            }
+        }
 
-		// Pick a method to call
-		if (available.size() > 1) {
-			log.warn("Warning multiple matching methods. Using first match.");
-		}
+        // Pick a method to call
+        if (available.size() > 1) {
+            log.warn("Warning multiple matching methods. Using first match.");
+        }
 
-		if (available.isEmpty()) {
-			return null;
-		}
+        if (available.isEmpty()) {
+            return null;
+        }
 
-		// At the moment we are just going to take the first match, for a
-		// later increment we might pick the best implementation
-		return (Method) available.get(0);
-	}
+        // At the moment we are just going to take the first match, for a
+        // later increment we might pick the best implementation
+        return (Method) available.get(0);
+    }
 
 }
