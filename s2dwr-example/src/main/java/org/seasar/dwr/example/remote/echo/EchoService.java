@@ -1,4 +1,4 @@
-package org.seasar.dwr.example.service;
+package org.seasar.dwr.example.remote.echo;
 
 public class EchoService {
 

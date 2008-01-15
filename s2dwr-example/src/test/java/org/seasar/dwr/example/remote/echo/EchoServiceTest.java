@@ -1,4 +1,6 @@
-package org.seasar.dwr.example.service;
+package org.seasar.dwr.example.remote.echo;
+
+import org.seasar.dwr.example.remote.echo.EchoService;
 
 import junit.framework.TestCase;
 

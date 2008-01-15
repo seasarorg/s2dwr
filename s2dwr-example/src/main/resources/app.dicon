@@ -4,7 +4,7 @@
 <components>
 	<include path="aop.dicon"/>
 	
-	<component class="org.seasar.dwr.example.service.EchoService">
+	<component class="org.seasar.dwr.example.remote.echo.EchoService">
 		<aspect pointcut="echo">aop.traceInterceptor</aspect>
 	</component>
 </components>

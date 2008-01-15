@@ -9,7 +9,7 @@
 	</init>
 	<allow>
 		<create javascript="Echo" creator="s2">
-			<param name="class" value="org.seasar.dwr.example.service.EchoService"/>
+			<param name="class" value="org.seasar.dwr.example.remote.echo.EchoService"/>
 		</create>
 	</allow>
 </dwr>
